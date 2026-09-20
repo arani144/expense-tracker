@@ -41,10 +41,11 @@ app.post(['/api/auth/register', '/auth/register'], async (req, res) => {
     );
     res.status(201).json({ message: 'User registered successfully!' });
   } catch (err) {
+    console.error("REGISTER ERROR:", err);
     if (err.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({ error: 'Username already taken.' });
     }
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.sqlMessage || err.message || 'Database error' });
   }
 });
 
