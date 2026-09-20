@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Expense Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-center items-center p-4">
+
+  <!-- AUTH VIEW (Login / Register) -->
+  <div id="authSection" class="w-full max-w-md bg-white p-8 rounded-2xl shadow-md">
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-indigo-600">💸 Expense Tracker</h1>
+      <p id="authSubtitle" class="text-sm text-gray-500 mt-1">Sign in to manage your budget</p>
+    </div>
+
+    <p id="authError" class="text-red-500 text-sm mb-3 hidden text-center"></p>
+
+    <form id="authForm" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">Username</label>
+        <input type="text" id="authUsername" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Password</label>
+        <input type="password" id="authPassword" required class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 outline-none" />
+      </div>
+      <button type="submit" id="authSubmitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg text-sm transition">Sign In</button>
+    </form>
+
+    <div class="text-center mt-4">
+      <button type="button" id="toggleAuthBtn" class="text-xs text-indigo-600 hover:underline">Don't have an account? Sign up</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD VIEW (Shown only after login) -->
+  <div id="dashboardSection" class="w-full max-w-5xl space-y-6 hidden">
+    
+    <header class="flex justify-between items-center bg-white p-6 rounded-xl shadow-sm">
+      <div>
+        <h1 class="text-2xl font-bold text-indigo-600">💸 Expense Tracker</h1>
+        <p class="text-xs text-gray-400">Welcome, <span id="userGreeting" class="font-medium text-slate-700"></span></p>
+      </div>
+      <div class="flex items-center gap-4">
+        <div>
+          <label class="text-sm font-medium mr-2">Month:</label>
+          <input type="month" id="monthPicker" class="border rounded px-3 py-1.5 text-sm" />
+        </div>
+        <button onclick="logout()" class="text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded font-medium">Logout</button>
+      </div>
+    </header>
+
+    <!-- Metrics Cards -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white p-5 rounded-xl shadow-sm">
+        <span class="text-sm text-gray-500">Monthly Budget</span>
+        <div class="flex items-center gap-2 mt-2">
+          <input type="number" id="budgetInput" placeholder="Set Budget" class="border rounded px-2 py-1 w-full text-lg font-semibold" />
+          <button onclick="saveBudget()" class="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700">Save</button>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-xl shadow-sm">
+        <span class="text-sm text-gray-500">Total Spent This Month</span>
+        <p id="totalSpent" class="text-2xl font-bold text-red-500 mt-2">$0.00</p>
+      </div>
+
+      <div class="bg-white p-5 rounded-xl shadow-sm">
+        <span class="text-sm text-gray-500">Remaining Balance</span>
+        <p id="remainingBalance" class="text-2xl font-bold text-emerald-600 mt-2">$0.00</p>
+      </div>
+    </section>
+
+    <!-- Add Expense & Chart Grid -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="bg-white p-6 rounded-xl shadow-sm">
+        <h2 class="text-lg font-bold mb-4">Add New Expense</h2>
+        <form id="expenseForm" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium">Title</label>
+            <input type="text" id="title" required class="w-full border rounded px-3 py-2 mt-1" placeholder="e.g. Groceries">
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+        <div>
+              <label class="block text-sm font-medium">Amount</label>
+              <input type="number" step="0.01" id="amount" required class="w-full border rounded px-3 py-2 mt-1" placeholder="50.00">
+            </div>
+            <div>
+              <label class="block text-sm font-medium">Category</label>
+              <select id="category" class="w-full border rounded px-3 py-2 mt-1">
+                <option value="Food & Dining">Food & Dining</option>
+                <option value="Transportation">Transportation</option>
+                <option value="Utilities & Bills">Utilities & Bills</option>
+                <option value="Shopping">Shopping</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Health">Health</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium">Date</label>
+            <input type="date" id="date" required class="w-full border rounded px-3 py-2 mt-1">
+          </div>
+          <button type="submit" class="w-full bg-indigo-600 text-white py-2 rounded-lg font-medium hover:bg-indigo-700">Add Expense</button>
+        </form>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow-sm flex flex-col items-center justify-center">
+        <h2 class="text-lg font-bold mb-4 self-start">Expense Distribution</h2>
+        <div class="w-64 h-64">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Expense Table -->
+    <section class="bg-white p-6 rounded-xl shadow-sm">
+      <h2 class="text-lg font-bold mb-4">Recent Expenses</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead class="bg-slate-50 border-b">
+            <tr>
+              <th class="p-3">Title</th>
+              <th class="p-3">Category</th>
+              <th class="p-3">Date</th>
+              <th class="p-3">Amount</th>
+              <th class="p-3">Action</th>
+            </tr>
+          </thead>
+          <tbody id="expenseTableBody" class="divide-y"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
