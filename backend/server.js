@@ -27,7 +27,7 @@ const authenticateToken = (req, res, next) => {
 // --- Auth Routes ---
 
 // Register
-app.post('/api/auth/register', async (req, res) => {
+app.post(['/api/auth/register', '/auth/register'], async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ error: 'Username and password required.' });
@@ -49,7 +49,7 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 // Login
-app.post('/api/auth/login', async (req, res) => {
+app.post(['/api/auth/login', '/auth/login'], async (req, res) => {
   const { username, password } = req.body;
   try {
     const [rows] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
